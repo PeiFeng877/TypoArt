@@ -230,7 +230,7 @@ export const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
                 marginTop: style.showAuthor ? 2 : 0,
                 letterSpacing: '0.05em',
               }}>
-                流光卡片
+                TypoArt
               </div>
             )}
           </div>

@@ -14,7 +14,7 @@ export function Header() {
     <header className="app-header">
       <div className="header-brand">
         <div className="header-logo">✦</div>
-        <span className="header-title">流光卡片</span>
+        <span className="header-title">TypoArt</span>
         <span className="header-subtitle">本地版</span>
       </div>
       <div className="header-actions">

@@ -1,73 +1,43 @@
-# React + TypeScript + Vite
+# ✦ TypoArt
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**TypoArt** 是一款极简、审美在线的**纯本地化**图文卡片生成器。
+核心理念是：拒绝登录，拒绝联网，拒绝功能臃肿。让排版和文字回归纯粹。
 
-Currently, two official plugins are available:
+## ✨ 特性 (Features)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **所见即所得编辑器**：无需弹窗，在卡片上直接点击文字进行修改。
+- **6 款精心设计的模板**：
+  - 流光渐变（默认、极光、落日）
+  - 经典排版（金句重点、拟物便签）
+  - 霞鹭文楷模式（专为长文本设计的纯净排版）
+- **多卡片连作**：支持同时创建多张卡片，适合书籍摘录或长文连载。
+- **一键 ZIP 批量导出**：无需一张张保存，一键将所有页面打包为高清图片压缩包下载。
+- **丰富的属性控制**：圆角、内边距、字号、行高自由调节，预设 12 款精选背景。
+- **纯本地极速运行**：所有编辑状态基于浏览器 `localStorage`，不上传任何隐私数据，刷新不丢失。
 
-## React Compiler
+## 🚀 快速开始
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+# 1. 安装依赖
+npm install
 
-## Expanding the ESLint configuration
+# 2. 启动本地开发服务器
+npm run dev
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 3. 构建生产版本 (产物将输出至 dist/ 目录)
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+构建出 `dist` 目录后，该应用即可作为一个完全静态的纯前端工具，部署到任何支持静态文件的服务器（如 GitHub Pages, Vercel）或直接本地双击打开使用。
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🛠️ 技术栈
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- 框架：**React 18** + **Vite** + **TypeScript**
+- 状态：**Zustand** (含 Persist 持久化)
+- 样式：**纯手工 CSS** (深色模式沉浸式编辑台)
+- 图标：**Lucide-React**
+- 渲染：**html-to-image** + **JSZip**
+
+## 📄 License
+
+MIT
