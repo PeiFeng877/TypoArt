@@ -95,7 +95,7 @@ jobs:
           final_response=$(curl -fsS \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records?type=CNAME&name=$CF_DNS_NAME")
-          printf '%s' "$final_response" | python -c 'import json,sys; data=json.load(sys.stdin); assert data.get("success"), data; result=data.get("result") or []; assert result, data; rec=result[0]; print(f"DNS OK: {rec['name']} -> {rec['content']} proxied={rec['proxied']}")'
+          printf '%s' "$final_response" | python -c 'import json,sys; data=json.load(sys.stdin); assert data.get("success"), data; result=data.get("result") or []; assert result, data; rec=result[0]; print("DNS OK: {} -> {} proxied={}".format(rec["name"], rec["content"], rec["proxied"]))'
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
