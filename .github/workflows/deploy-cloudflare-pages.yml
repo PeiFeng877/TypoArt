@@ -34,6 +34,60 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Ensure Cloudflare DNS
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ZONE_NAME: peifeng.me
+          CF_DNS_NAME: typoart.peifeng.me
+          CF_DNS_CONTENT: typoart.pages.dev
+        run: |
+          set -eu
+
+          zone_response=$(curl -fsS \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/zones?name=$CF_ZONE_NAME")
+          zone_id=$(printf '%s' "$zone_response" | python -c 'import json,sys; data=json.load(sys.stdin); print(data["result"][0]["id"] if data.get("result") else "")')
+
+          if [ -z "$zone_id" ]; then
+            echo "Unable to resolve Cloudflare zone for $CF_ZONE_NAME" >&2
+            exit 1
+          fi
+
+          record_response=$(curl -fsS \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records?type=CNAME&name=$CF_DNS_NAME")
+          record_id=$(printf '%s' "$record_response" | python -c 'import json,sys; data=json.load(sys.stdin); result=data.get("result") or []; print(result[0]["id"] if result else "")')
+
+          payload=$(python - <<'PY'
+          import json
+          import os
+
+          print(json.dumps({
+              "type": "CNAME",
+              "name": os.environ["CF_DNS_NAME"],
+              "content": os.environ["CF_DNS_CONTENT"],
+              "proxied": True,
+              "ttl": 1,
+          }))
+          PY
+          )
+
+          if [ -n "$record_id" ]; then
+            curl -fsS \
+              -X PUT \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data "$payload" \
+              "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records/$record_id" >/dev/null
+          else
+            curl -fsS \
+              -X POST \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data "$payload" \
+              "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" >/dev/null
+          fi
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
