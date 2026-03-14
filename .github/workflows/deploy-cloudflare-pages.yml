@@ -46,6 +46,7 @@ jobs:
           zone_response=$(curl -fsS \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             "https://api.cloudflare.com/client/v4/zones?name=$CF_ZONE_NAME")
+          printf '%s' "$zone_response" | python -c 'import json,sys; data=json.load(sys.stdin); assert data.get("success"), data'
           zone_id=$(printf '%s' "$zone_response" | python -c 'import json,sys; data=json.load(sys.stdin); print(data["result"][0]["id"] if data.get("result") else "")')
 
           if [ -z "$zone_id" ]; then
@@ -56,6 +57,7 @@ jobs:
           record_response=$(curl -fsS \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records?type=CNAME&name=$CF_DNS_NAME")
+          printf '%s' "$record_response" | python -c 'import json,sys; data=json.load(sys.stdin); assert data.get("success"), data'
           record_id=$(printf '%s' "$record_response" | python -c 'import json,sys; data=json.load(sys.stdin); result=data.get("result") or []; print(result[0]["id"] if result else "")')
 
           payload=$(python - <<'PY'
@@ -73,20 +75,27 @@ jobs:
           )
 
           if [ -n "$record_id" ]; then
-            curl -fsS \
+            update_response=$(curl -fsS \
               -X PUT \
               -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
               -H "Content-Type: application/json" \
               --data "$payload" \
-              "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records/$record_id" >/dev/null
+              "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records/$record_id")
+            printf '%s' "$update_response" | python -c 'import json,sys; data=json.load(sys.stdin); assert data.get("success"), data'
           else
-            curl -fsS \
+            create_response=$(curl -fsS \
               -X POST \
               -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
               -H "Content-Type: application/json" \
               --data "$payload" \
-              "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" >/dev/null
+              "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records")
+            printf '%s' "$create_response" | python -c 'import json,sys; data=json.load(sys.stdin); assert data.get("success"), data'
           fi
+
+          final_response=$(curl -fsS \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records?type=CNAME&name=$CF_DNS_NAME")
+          printf '%s' "$final_response" | python -c 'import json,sys; data=json.load(sys.stdin); assert data.get("success"), data; result=data.get("result") or []; assert result, data; rec=result[0]; print(f"DNS OK: {rec['name']} -> {rec['content']} proxied={rec['proxied']}")'
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
